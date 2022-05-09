@@ -1,0 +1,39 @@
+version = '0.1.0'
+
+dependencies {
+    implementation 'foundation.icon:javaee-api:0.9.1'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+
+optimizedJar {
+    mainClassName = 'com.iconloop.score.example.StdReferenceProxy'
+    archivesBaseName = 'std-reference-proxy'
+}
+
+deployJar {
+    endpoints {
+        lisbon {
+            uri = 'https://lisbon.net.solidwallet.io/api/v3'
+            nid = 0x2
+        }
+        berlin {
+            uri = 'https://berlin.net.solidwallet.io/api/v3'
+            nid = 0x7
+        }
+        local {
+            uri = 'http://localhost:9082/api/v3'
+            nid = 0x3
+        }
+    }
+    keystore = rootProject.hasProperty('keystoreName') ? "$keystoreName" : ''
+    password = rootProject.hasProperty('keystorePass') ? "$keystorePass" : ''
+    parameters {
+        arg('_ref', 'cxdc0e6b0c4fc37b73cc45070eb00d42ad2228b5b4')
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

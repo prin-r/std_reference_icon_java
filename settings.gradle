@@ -1,0 +1,6 @@
+rootProject.name = 'java-score-examples'
+include (
+    'testinteg',
+    'std-reference-basic',
+    'std-reference-proxy'
+)

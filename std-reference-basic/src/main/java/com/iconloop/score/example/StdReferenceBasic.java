@@ -126,29 +126,24 @@ public class StdReferenceBasic {
     }
 
     @External
-    public void relay(String _symbols, String _rates, String _resolveTimes, String _requestIDs) {
+    public void relay(String _symbols, String _rates, String resolveTime, String requestID) {
         Context.require(this.isRelayer.getOrDefault(Context.getOrigin(), false), "NOTARELAYER");
 
         String[] symbols = _split(_symbols, ",");
         String[] rates = _split(_rates, ",");
-        String[] resolveTimes = _split(_resolveTimes, ",");
-        String[] requestIDs = _split(_requestIDs, ",");
-        int len = symbols.length;
 
-        Context.require(rates.length == len, "BADRATESLENGTH");
-        Context.require(resolveTimes.length == len, "BADRESOLVETIMESLENGTH");
-        Context.require(requestIDs.length == len, "BADREQUESTIDSLENGTH");
+        Context.require(rates.length == symbols.length, "BADRATESLENGTH");
 
-        for (int idx = 0; idx < len; idx++) {
+        for (int idx = 0; idx < symbols.length; idx++) {
             this.rates.set(symbols[idx], new BigInteger(rates[idx]));
-            this.resolveTimes.set(symbols[idx], new BigInteger(resolveTimes[idx]).multiply(new BigInteger("1000000")));
-            this.requestIDs.set(symbols[idx], new BigInteger(requestIDs[idx]));
+            this.resolveTimes.set(symbols[idx], new BigInteger(resolveTime).multiply(new BigInteger("1000000")));
+            this.requestIDs.set(symbols[idx], new BigInteger(requestID));
 
             RefDataUpdate(
                 symbols[idx],
                 rates[idx],
-                resolveTimes[idx],
-                requestIDs[idx]
+                resolveTime,
+                requestID
             );
         }
     }

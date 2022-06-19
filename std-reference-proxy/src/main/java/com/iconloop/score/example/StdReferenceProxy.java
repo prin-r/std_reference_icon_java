@@ -10,6 +10,7 @@ import score.annotation.Payable;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 public class StdReferenceProxy {
     private Address owner;
@@ -67,20 +68,20 @@ public class StdReferenceProxy {
     }
 
     @External(readonly=true)
-    public List<BigInteger> getReferenceData(String base, String quote) {
-        return (List<BigInteger>) Context.call(List.class, this.ref, "getReferenceData", base, quote);
+    public Map<String, BigInteger> get_reference_data(String base, String quote) {
+        return (Map<String, BigInteger>) Context.call(Map.class, this.ref, "get_reference_data", base, quote);
     }
 
     @External(readonly=true)
-    public List<List<BigInteger>> getReferenceDataBulk(String[] bases, String[] quotes) {
-        return (List<List<BigInteger>>) Context.call(List.class, this.ref, "getReferenceDataBulk", bases, quotes);
+    public List<Map<String, BigInteger>> get_reference_data_bulk(String[] bases, String[] quotes) {
+        return (List<Map<String, BigInteger>>) Context.call(List.class, this.ref, "get_reference_data_bulk", bases, quotes);
     }
 
     @External(readonly=true)
-    public List<List<BigInteger>> _getReferenceDataBulk(String _bases, String _quotes) {
+    public List<Map<String, BigInteger>> _get_reference_data_bulk(String _bases, String _quotes) {
         String[] bases = _split(_bases, ",");
         String[] quotes = _split(_quotes, ",");
-        return (List<List<BigInteger>>) Context.call(List.class, Context.getAddress(), "getReferenceDataBulk", bases, quotes);
+        return (List<Map<String, BigInteger>>) Context.call(List.class, Context.getAddress(), "get_reference_data_bulk", bases, quotes);
     }
 
     @Payable

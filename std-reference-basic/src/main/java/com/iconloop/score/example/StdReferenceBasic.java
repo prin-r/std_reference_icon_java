@@ -10,6 +10,7 @@ import score.annotation.Payable;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 public class StdReferenceBasic {
     private Address owner;
@@ -65,9 +66,16 @@ public class StdReferenceBasic {
     }
 
     @External(readonly=true)
-    public List<BigInteger> getRefData(String symbol) {
+    public Map<String, BigInteger> getRefData(String symbol) {
         if (symbol.equals("USD")) {
-            return List.of(this.E9, BigInteger.valueOf(Context.getBlockTimestamp()), BigInteger.ZERO);
+            return Map.of(
+                "rate",
+                this.E9,
+                "last_update",
+                BigInteger.valueOf(Context.getBlockTimestamp()),
+                "request_id",
+                BigInteger.ZERO
+            );
         }
 
         BigInteger rate = rates.getOrDefault(symbol, BigInteger.ZERO);
@@ -76,35 +84,50 @@ public class StdReferenceBasic {
 
         Context.require(resolveTime.compareTo(BigInteger.ZERO) > 0, "REFDATANOTAVAILABLE");
 
-        return List.of(rate, resolveTime, requestID);
+        return Map.of(
+            "rate",
+            rate,
+            "last_update",
+            resolveTime,
+            "request_id",
+            requestID
+        );
     }
 
     @External(readonly=true)
-    public List<BigInteger> getReferenceData(String base, String quote) {
-        List<?> b = Context.call(List.class, Context.getAddress(), "getRefData", base);
-        List<?> q = Context.call(List.class, Context.getAddress(), "getRefData", quote);
-        BigInteger b0 = (BigInteger) b.get(0);
-        BigInteger b1 = (BigInteger) b.get(1);
-        BigInteger q0 = (BigInteger) q.get(0);
-        BigInteger q1 = (BigInteger) q.get(1);
-        return List.of(b0.multiply(this.E9.multiply(this.E9)).divide(q0), b1, q1);
+    public Map<String, BigInteger> get_reference_data(String base, String quote) {
+        Map<String,?> b = Context.call(Map.class, Context.getAddress(), "getRefData", base);
+        Map<String,?> q = Context.call(Map.class, Context.getAddress(), "getRefData", quote);
+        BigInteger b0 = (BigInteger) b.get("rate");
+        BigInteger b1 = (BigInteger) b.get("last_update");
+        BigInteger q0 = (BigInteger) q.get("rate");
+        BigInteger q1 = (BigInteger) q.get("last_update");
+
+        return Map.of(
+            "rate",
+            b0.multiply(this.E9.multiply(this.E9)).divide(q0),
+            "last_update_base",
+            b1,
+            "last_update_quote",
+            q1
+        );
     }
 
     @External(readonly=true)
-    public List<List<BigInteger>> getReferenceDataBulk(String[] bases, String[] quotes) {
+    public List<Map<String, BigInteger>> get_reference_data_bulk(String[] bases, String[] quotes) {
         Context.require(bases.length == quotes.length, "Size of bases and quotes must be equal");
-        List<BigInteger>[] acc = new List[bases.length];
+        Map<String, BigInteger>[] acc = new Map[bases.length];
         for (int i = 0; i < bases.length; i++) {
-            acc[i] = (List<BigInteger>) Context.call(List.class, Context.getAddress(), "getReferenceData", bases[i], quotes[i]);
+            acc[i] = (Map<String, BigInteger>) Context.call(Map.class, Context.getAddress(), "get_reference_data", bases[i], quotes[i]);
         }
         return List.of(acc);
     }
 
     @External(readonly=true)
-    public List<List<BigInteger>> _getReferenceDataBulk(String _bases, String _quotes) {
+    public List<Map<String, BigInteger>> _get_reference_data_bulk(String _bases, String _quotes) {
         String[] bases = _split(_bases, ",");
         String[] quotes = _split(_quotes, ",");
-        return (List<List<BigInteger>>) Context.call(List.class, Context.getAddress(), "getReferenceDataBulk", bases, quotes);
+        return (List<Map<String, BigInteger>>) Context.call(List.class, Context.getAddress(), "get_reference_data_bulk", bases, quotes);
     }
 
     @External()
